@@ -1,0 +1,33 @@
+基础理论部分
+0. Can you come up out 3 sceneraies which use AI methods?
+Ans: auto people face recognition, dialog robot, auto stock transaction
+
+1. How do we use Github; Why do we use Jupyter and Pycharm;
+Ans: use Github for share codes and experiences. 
+Jupyter is better for coach and demenstration and small program; Pycharm is better for bigger or complex coding
+
+2. What's the Probability Model?
+Ans: a Probability Model is a statistical model to describe the probability of sth, concerning the generation of sample data (and similar data from a larger population).
+
+3. Can you came up with some sceneraies at which we could use Probability Model?
+Ans: gamble, insurance
+
+4. Why do we use probability and what's the difficult points for programming based on parsing and pattern match?
+Ans: In NLP, we use probability to solve the difficulties of programming based on parsing and pattern match.
+The difficulties of programming based on parsing and pattern match are: natural language process in computer may be too complex to analyze in parsing and pattern match, especially in complex situations.
+
+5. What's the Language Model;
+Ans: the probability of a sentance based on mass sentance data
+
+6. Can you came up with some sceneraies at which we could use Language Model?
+Ans: to differentiate the ambiguous language from voice recognition 
+
+7. What's the 1-gram language model;
+Ans: combine the probability of single word of sentences separately.
+
+8. What's the disadvantages and advantages of 1-gram language model;
+Ans: disadv: the connections of words are not considered and so the probability of low in complex situation; 
+adv:it is faster in running speed, and maybe useful for very targeted simple situaiton
+
+9. What't the 2-gram models;
+Ans: combine the probability of both separate single word and adjacent 2 words
