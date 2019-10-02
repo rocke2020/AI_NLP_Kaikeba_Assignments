@@ -53,3 +53,83 @@ def generate_sentence(grammar_dict: dict, starter='sentence'):
 
 print(generate_sentence(baby_dictionary))
 print(generate_sentence(parents_dictionary))
+
+''' language model process
+1, read original data, select a column to a list of sentences, clean sentences
+ to get pure words by ''.join(re.findall(r'\w+', string)), may need str() item 
+ from list in advance.
+2, write all words into 2.txt file line by line per list item.
+3, get 1gram TOKEN by jieba cut per line words from 2.txt file, and 
+words_count1 from Counter(), write prob_1word()
+4, get 2gram TOKEN and words_count2, and write prob_2words()
+5, get_probabiliy() of 2 gram, and run it with generate_sentence to see 
+probabilities.
+'''
+
+
+# file = r'D:\ai_data\kaike\data\insurance_questions.txt'
+# content = pd.read_csv(file, header=None, sep=r'\+\+\$\+\+',
+#                       encoding='utf', engine='python')
+# articles = content[2].tolist()
+file = r'D:\ai_data\kaike\data\movie_comments.txt'
+content = pd.read_csv(file, encoding='utf-8')
+articles = content['comment'].tolist()
+print('total sentences:', len(articles), 'First item:', articles[0])
+articles_clean = [''.join(re.findall(r'\w+', str(sentence)))
+                  for sentence in articles]
+
+file_article_clean = r'D:\ai_data\kaike\data\movie_comments_clean.txt'
+with open(file_article_clean, 'w', encoding='utf-8') as f:
+    for line in articles_clean:
+        f.write(line + '\n')
+
+TOKEN = []
+with open(file_article_clean, 'r', encoding='utf-8') as f:
+    for i, line in enumerate(f):
+        if i == 20000:
+            break
+        TOKEN += list(jieba.cut(line))
+words_count1 = Counter(TOKEN)
+length1 = len(TOKEN)
+print(TOKEN[0])
+
+
+def prob_1word(word):
+    if words_count1[word] == 0:
+        words_count1[word] = 1
+    return words_count1[word] / length1
+
+
+TOKEN2words = [''.join(TOKEN[i:i+2]) for i in range(length1 - 1)]
+print(TOKEN2words[0])
+words_count2 = Counter(TOKEN2words)
+length2 = len(TOKEN2words)
+
+
+def prob_2words(word):
+    if words_count2[word] == 0:
+        words_count2[word] = 1
+    return words_count2[word] / length2
+
+
+def get_probability(sentence):
+    words = list(jieba.cut(sentence))
+    probability = 1
+    for i, word in enumerate(words[:-1]):
+        if i == 0:
+            probability *= prob_1word(word)
+        else:
+            probability *= prob_2words(word+words[i+1]) / prob_1word(word)
+    return probability
+
+
+max_prob = 0
+max_prob_sentence = ''
+for i in range(10):
+    sentence = generate_sentence(baby_dictionary)
+    prob = get_probability(sentence)
+    print(sentence, prob)
+    if prob > max_prob:
+        max_prob = prob
+        max_prob_sentence = sentence
+print('max: ', max_prob_sentence, max_prob)
