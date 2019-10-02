@@ -1,0 +1,55 @@
+from random import choice
+
+baby_grammar = """
+sentence => parents requests
+parents => 妈妈, | 爸爸,
+requests => 我 verb_phrase
+verb_phrase => adv verb
+adv => adv_final | adv_degree adv_final
+adv_final => 要 | 想
+adv_degree => adv_degree_final | adv_degree_final adv_degree
+adv_degree_final => 不 | 不太 | 很 | 有点  
+verb => 出去玩 | 去动物园
+"""
+parents_grammar = """
+sentence => baby_name replies
+baby_name => dear, | darling, | baby,
+replies => OK, I verb_phrase
+verb_phrase => verb noun | adv_degree verb noun
+adv_degree => adv_degree_final | adv_degree_final adv_degree
+adv_degree_final => very | deeply | sincerely
+verb => love | like
+noun => you | baby
+"""
+
+
+def create_grammar(grammar: str, inline_divider='=>', line_divider='\n'):
+    res = {}
+    for line in grammar.split(line_divider):
+        if not line:
+            continue
+        word, content = line.split(inline_divider)
+        res[word.strip()] = [w.split() for w in content.split('|')]
+    return res
+
+
+baby_dictionary = create_grammar(baby_grammar)
+parents_dictionary = create_grammar(parents_grammar)
+print(baby_dictionary)
+
+
+def generate_sentence(grammar_dict: dict, starter='sentence'):
+    sentence = []
+    if starter not in grammar_dict:
+        return starter
+    else:
+        sentence = [generate_sentence(grammar_dict, words)
+                    for words in choice(grammar_dict[starter])]
+        # print(sentence)
+    # for English, we need use ' '.join to separate words;
+    # for Chinese, no need separate and so use ''.join
+    return ' '.join(sentence)
+
+
+print(generate_sentence(baby_dictionary))
+print(generate_sentence(parents_dictionary))
