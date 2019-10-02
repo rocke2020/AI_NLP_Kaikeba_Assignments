@@ -123,13 +123,21 @@ def get_probability(sentence):
     return probability
 
 
-max_prob = 0
-max_prob_sentence = ''
+# firstly use most max algorithm and then use sorted function as exercise
+# max_prob = 0
+# max_prob_sentence = ''
+sentences = []
 for i in range(10):
-    sentence = generate_sentence(baby_dictionary)
-    prob = get_probability(sentence)
-    print(sentence, prob)
-    if prob > max_prob:
-        max_prob = prob
-        max_prob_sentence = sentence
-print('max: ', max_prob_sentence, max_prob)
+    # good variable name avoid possible problem, to avoid mistake of sentences 
+    # and sentence, add single for single noun. I mistook them in the beginning!
+    single_sentence = generate_sentence(baby_dictionary)
+    prob = get_probability(single_sentence)
+    # print(sentence, prob)
+    # if prob > max_prob:
+    #     max_prob = prob
+    #     max_prob_sentence = sentence
+    sentences.append((single_sentence, prob))
+# sentences = sorted(sentences, key=lambda x: x[1], reverse=True)
+sentences.sort(key=lambda x: x[1], reverse=True)
+# print('max: ', max_prob_sentence, max_prob)
+print('max:', sentences[0][0], sentences[0][1])
