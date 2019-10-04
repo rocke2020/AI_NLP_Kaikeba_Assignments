@@ -1,1 +1,1 @@
-# AI_NLP_homework
+# AI_NLP_Kaikeba_Assignments
