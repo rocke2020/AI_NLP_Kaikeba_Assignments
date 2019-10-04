@@ -1,0 +1,146 @@
+from random import choice
+
+
+def is_variable(pat):
+    return pat.startswith('?') and all(i.isalpha() for i in pat[1:])
+
+
+def is_pattern_segment(pattern):
+    return pattern.startswith('?*') and all(i.isalpha() for i in pattern[2:])
+
+s = '?*y'
+print('is_pattern_segment:', is_pattern_segment(s))
+
+
+def pat_match_with_seg(pattern, saying):
+    if not pattern or not saying:
+        return []
+    pat = pattern[0]
+    if is_variable(pat):
+        return [(pat, saying[0])] + pat_match_with_seg(pattern[1:], saying[1:])
+    elif is_pattern_segment(pat):
+        match, index = segment_match(pattern, saying)
+        if match == 0:
+            return [0]
+        return [match] + pat_match_with_seg(pattern[1:], saying[index:])
+    elif pat == saying[0]:
+        return pat_match_with_seg(pattern[1:], saying[1:])
+    else:
+        return [0]
+
+
+def segment_match(pattern: list, saying: list):
+    """这个函数输入是一个以 segment_pattern开头的模式，尽最大可能进行，匹配到这个边长
+    的变量对于的部分。
+    """
+    # change ?*X to ?X, that's single_placeholder
+    single_placeholder = '?' + pattern[0][2]
+    if len(pattern) > 1:
+        for i, token in enumerate(saying):
+            if pattern[1] == token and is_match(pattern[2:], saying[i + 1:]):
+                return (single_placeholder, saying[:i]), i
+        return 0, 0
+    else:
+        return (single_placeholder, saying), len(saying)
+
+
+def is_match(rest, saying):
+    if not rest and not saying:
+        return True
+    if not all(a.isalpha() for a in rest[0]):
+        return True
+    if rest[0] != saying[0]:
+        return False
+    return is_match(rest[1:], saying[1:])
+
+print(segment_match('?*P is good'.split(), 'My dog is good'.split()))
+print(segment_match('?*X'.split(), 'a phone'.split()))
+print(segment_match('?*X at'.split(), 'a phone'.split()))
+'''
+(('?P', ['My', 'dog']), 2)
+(('?X', ['a', 'phone']), 2)
+(('?X', ['a', 'phone']), 2)
+'''
+
+print('I need ?X', pat_match_with_seg('I need ?X'.split(),
+                                      "I need phone".split()))
+print(pat_match_with_seg('?*P is very good and ?*X'.split(),
+                         "My dog is very good and my cat is very cute".split()))
+print(pat_match_with_seg("?X equals ?Y".split(), "2+2 equals 2+3".split()))
+
+
+def pat_to_dict(patterns):
+    return {k: ' '.join(v) if isinstance(v, list) else v for k, v in patterns}
+
+
+def substitute(dialog, pat_dict):
+    if not dialog:
+        return []
+    # nice to really use dict.get()!
+    return [pat_dict.get(dialog[0], dialog[0])] + substitute(dialog[1:],
+                                                             pat_dict)
+
+
+got_patterns = pat_match_with_seg("I want ?*X".split(),
+                                  "I want an baby".split())
+got_dict = pat_to_dict(got_patterns)
+print('got_dict', got_dict)
+print(substitute("What if you mean if you got ?X".split(), got_dict))
+# ['What', 'if', 'you', 'mean', 'if', 'you', 'got', 'an baby']
+
+defined_patterns = {
+    "I need ?X": ["Image you will get ?X soon", "Why do you need ?X ?"],
+    "My ?X told me something":
+        ["Talk about more about your ?X", "How do you think about your ?X ?"],
+    "I dont like my ?X": ["What bad things did ?X do for you?"],
+    "I was ?*X": ["Were you really ?X ?", "I already knew you were ?X ."],
+    "?X is cooking and ?Y is driving": ["?X is a good chef!",
+                                        "?Y care safe on traffic.",
+                                        'Are your family in caravan now?'],
+    "?X is cooking": ["?X is a good chef!", 'I am also hunry.'],
+    '?*x hello ?*y': ['How do you do', 'Please state your problem'],
+    '?*x I want ?*y': ['what would it mean if you got ?y', 'Why do you want ?y',
+                       'Suppose you got ?y soon'],
+    '?*x if ?*y': ['Do you really think its likely that ?y',
+                   'Do you wish that ?y', 'What do you think about ?y',
+                   'Really-- if ?y'],
+    '?*x no ?*y': ['why not?', 'You are being a negative',
+                   'Are you saying \'No\' just to be negative?'],
+    '?*x I was ?*y': ['Were you really', 'Perhaps I already knew you were ?y',
+                      'Why do you tell me you were ?y now?'],
+    '?*x I feel ?*y': ['Do you often feel ?y ?',
+                       'What other feelings do you have?'],
+    '?*x': ['I cannot understand your words, could you explain more details?']
+}
+
+
+def get_response(saying, rules=defined_patterns):
+    """" please implement the code, to get the response as followings:
+     get_response('I need iPhone')
+        Image you will get iPhone soon
+     get_response("My mother told me something")
+        Talk about more about your mother.
+    """
+    temp_patterns = []
+    k = ''
+    for k in rules.keys():
+        temp_patterns = pat_match_with_seg(k.split(), saying.split())
+        if 0 not in temp_patterns:
+            break
+    reply = choice(rules[k]).split()
+    print(' '.join(substitute(reply, pat_to_dict(temp_patterns))))
+
+
+
+dialog_list = ['I need iPhone', "My mother told me something",
+               'I need iPhone but dislike the price', 'I was a man',
+               'mam is cooking and dad is driving',
+               'grandpa is cooking and I am hungry',
+               'Rock, hello',
+               'mama, I want water'
+               ]
+for sentence in dialog_list:
+    print(sentence, end='. ')
+    get_response(sentence)
+    print(sentence, end='. ')
+    get_response(sentence)
